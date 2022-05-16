@@ -11,6 +11,7 @@ import createError from "http-errors"
 import UsersModel from "./model.js"
 import { checkUserMiddleware, checkValidationResult } from "./validation.js"
 import BooksModel from "../books/model.js"
+import { sendEmail } from "../../lib/emails.js"
 
 const usersRouter = express.Router()
 
@@ -203,6 +204,21 @@ usersRouter.delete("/:userId/purchaseHistory/:bookId", async (req, res, next) =>
     } else {
       next(createError(404, `User with id ${req.params.userId} not found!`))
     }
+  } catch (error) {
+    next(error)
+  }
+})
+
+usersRouter.post("/email", async (req, res, next) => {
+  try {
+    // 1. We are receiving the email address of the recipient from req.body
+    const { email } = req.body
+
+    // 2. We gonna send an email to that address
+    await sendEmail(email)
+
+    // 3. Send a response back
+    res.send({ message: "Email sent successfully!" })
   } catch (error) {
     next(error)
   }
